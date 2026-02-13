@@ -29,15 +29,15 @@ Terminal UI for managing [mihomo](https://github.com/MetaCubeX/mihomo) proxy on 
 ## Install
 
 ```bash
-git clone https://github.com/<your-username>/proxy-tui.git ~/proxy-tui
-cd ~/proxy-tui
+git clone https://github.com/pengjunfeng11/mihomo-tui.git ~/mihomo-tui
+cd ~/mihomo-tui
 uv sync
 ```
 
 添加快捷命令到 shell 配置（`.bashrc` / `.zshrc`）：
 
 ```bash
-alias proxtui='cd ~/proxy-tui && uv run proxy-tui'
+alias proxtui='cd ~/mihomo-tui && uv run proxy-tui'
 ```
 
 ## Usage
