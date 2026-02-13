@@ -28,6 +28,15 @@ Terminal UI for managing [mihomo](https://github.com/MetaCubeX/mihomo) proxy on 
 
 ## Install
 
+一键安装（自动安装 uv、克隆仓库、配置 alias）：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/pengjunfeng11/mihomo-tui/main/install.sh | bash
+```
+
+<details>
+<summary>手动安装</summary>
+
 ```bash
 git clone https://github.com/pengjunfeng11/mihomo-tui.git ~/mihomo-tui
 cd ~/mihomo-tui
@@ -39,6 +48,8 @@ uv sync
 ```bash
 alias proxtui='cd ~/mihomo-tui && uv run proxy-tui'
 ```
+
+</details>
 
 ## Usage
 
@@ -80,7 +91,8 @@ proxtui
 ## Project Structure
 
 ```
-proxy-tui/
+mihomo-tui/
+├── install.sh              # 一键安装脚本
 ├── pyproject.toml          # 项目配置 & 依赖
 ├── proxy_tui/
 │   ├── __init__.py
