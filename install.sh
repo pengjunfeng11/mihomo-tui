@@ -64,24 +64,21 @@ if [ -d "$CLASHCTL_DIR/bin" ] && [ -d "$CLASHCTL_DIR/scripts" ]; then
     ok "clashctl already installed"
 else
     info "clashctl not found, installing..."
-    TMPDIR=$(mktemp -d)
+    CLASHCTL_TMP=$(mktemp -d)
     # 尝试直连，失败则用加速
-    if git clone --branch master --depth 1 --quiet "$CLASHCTL_REPO" "$TMPDIR" 2>/dev/null; then
+    if git clone --branch master --depth 1 --quiet "$CLASHCTL_REPO" "$CLASHCTL_TMP" 2>/dev/null; then
         ok "Cloned clashctl"
     else
         warn "Direct clone failed, trying proxy..."
-        git clone --branch master --depth 1 --quiet "${GH_PROXY}/${CLASHCTL_REPO}" "$TMPDIR"
+        git clone --branch master --depth 1 --quiet "${GH_PROXY}/${CLASHCTL_REPO}" "$CLASHCTL_TMP"
         ok "Cloned clashctl via proxy"
     fi
-    info "Running clashctl installer..."
+    info "Running clashctl installer (interactive)..."
     printf '\n'
-    (cd "$TMPDIR" && bash install.sh)
+    # 用 /dev/tty 提供 stdin，使 curl|bash 场景下交互正常
+    (cd "$CLASHCTL_TMP" && bash install.sh < /dev/tty)
     printf '\n'
-    rm -rf "$TMPDIR"
-    # 重新加载 shell 函数
-    RC_FILE=$(detect_rc)
-    # shellcheck disable=SC1090
-    source "$RC_FILE" 2>/dev/null || true
+    rm -rf "$CLASHCTL_TMP"
     ok "clashctl installed"
 fi
 
