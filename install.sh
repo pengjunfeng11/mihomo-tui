@@ -5,17 +5,20 @@ REPO="https://github.com/pengjunfeng11/mihomo-tui.git"
 INSTALL_DIR="$HOME/mihomo-tui"
 ALIAS_CMD="alias proxtui='cd ~/mihomo-tui && uv run proxy-tui'"
 
+CLASHCTL_REPO="https://github.com/nelvko/clash-for-linux-install.git"
+CLASHCTL_DIR="$HOME/clashctl"
+GH_PROXY="https://gh-proxy.org"
+
 # ── Helpers ──────────────────────────────────────────────────────────
 
 info()  { printf "\033[1;34m[INFO]\033[0m  %s\n" "$*"; }
 ok()    { printf "\033[1;32m[OK]\033[0m    %s\n" "$*"; }
+warn()  { printf "\033[1;33m[WARN]\033[0m  %s\n" "$*"; }
 err()   { printf "\033[1;31m[ERR]\033[0m   %s\n" "$*" >&2; }
 
 check_cmd() {
     command -v "$1" &>/dev/null
 }
-
-# ── Detect shell config ─────────────────────────────────────────────
 
 detect_rc() {
     case "$(basename "$SHELL")" in
@@ -28,7 +31,6 @@ detect_rc() {
 
 info "Checking prerequisites..."
 
-# Python >= 3.10
 if check_cmd python3; then
     py_ver=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
     if python3 -c 'import sys; exit(0 if sys.version_info >= (3,10) else 1)'; then
@@ -42,12 +44,45 @@ else
     exit 1
 fi
 
-# git
 if check_cmd git; then
     ok "git"
 else
     err "git not found, please install git"
     exit 1
+fi
+
+if check_cmd curl; then
+    ok "curl"
+else
+    err "curl not found, please install curl"
+    exit 1
+fi
+
+# ── Install clashctl ─────────────────────────────────────────────────
+
+if [ -d "$CLASHCTL_DIR/bin" ] && [ -d "$CLASHCTL_DIR/scripts" ]; then
+    ok "clashctl already installed"
+else
+    info "clashctl not found, installing..."
+    TMPDIR=$(mktemp -d)
+    # 尝试直连，失败则用加速
+    if git clone --branch master --depth 1 --quiet "$CLASHCTL_REPO" "$TMPDIR" 2>/dev/null; then
+        ok "Cloned clashctl"
+    else
+        warn "Direct clone failed, trying proxy..."
+        git clone --branch master --depth 1 --quiet "${GH_PROXY}/${CLASHCTL_REPO}" "$TMPDIR"
+        ok "Cloned clashctl via proxy"
+    fi
+    info "Running clashctl installer..."
+    printf '\n'
+    (cd "$TMPDIR" && bash install.sh)
+    printf '\n'
+    rm -rf "$TMPDIR"
+    # 重新加载 shell 函数
+    RC_FILE=$(detect_rc)
+    # shellcheck disable=SC1090
+    source "$RC_FILE" 2>/dev/null || true
+    ok "clashctl installed"
 fi
 
 # ── Install uv ───────────────────────────────────────────────────────
@@ -66,10 +101,10 @@ else
     fi
 fi
 
-# ── Clone / Update ───────────────────────────────────────────────────
+# ── Clone / Update mihomo-tui ────────────────────────────────────────
 
 if [ -d "$INSTALL_DIR/.git" ]; then
-    info "Updating existing installation..."
+    info "Updating mihomo-tui..."
     git -C "$INSTALL_DIR" pull --rebase --quiet
     ok "Updated"
 else
@@ -103,10 +138,7 @@ fi
 # ── Done ─────────────────────────────────────────────────────────────
 
 printf '\n'
-ok "Installation complete!"
-printf '\n'
-info "Prerequisite: clashctl must be installed"
-info "  → https://github.com/nelvko/clash-for-linux-install"
+ok "Installation complete! Run 'proxtui' to start."
 printf '\n'
 
 # 重启当前 shell 使 alias 立即生效
