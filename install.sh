@@ -105,9 +105,9 @@ fi
 printf '\n'
 ok "Installation complete!"
 printf '\n'
-info "Run the following to start using:"
-printf '    source %s && proxtui\n' "$RC_FILE"
-printf '\n'
 info "Prerequisite: clashctl must be installed"
 info "  → https://github.com/nelvko/clash-for-linux-install"
 printf '\n'
+
+# 重启当前 shell 使 alias 立即生效
+exec "$SHELL"
